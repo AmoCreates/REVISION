@@ -37,6 +37,13 @@ const users = [
     contact: 74727856,
     age: 22
   },
+  {
+    id: 106,
+    name: "Sunny",
+    email: "sunny582@gmail.com",
+    contact: 56727856,
+    age: 22
+  },
 ]
 
 userRouter.get('/:id', (req, res) => {
