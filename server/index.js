@@ -23,6 +23,11 @@ app.get("/", (req, res) => {
 	res.send("server is ready to serve");
 });
 
+app.get('/search', (req, res) => {
+	const query = req.query
+	res.json(query);
+})
+
 app.use('/user', userRouter)
 
 app.listen(port, () => {
