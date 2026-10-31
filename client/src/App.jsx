@@ -11,7 +11,56 @@ export default function App() {
 	});
 
 	const [error, setError] = useState("");
+	const [successMsg, setSuccessMsg] = useState("");
 	const [success, setSuccess] = useState(false);
+	const [islogin, setIsLogin] = useState(false);
+
+	const signup = async () => {
+		try {
+			const { data } = await axios.post(
+				"http://localhost:3000/signup",
+				formData,
+				{
+					withCredentials: true,
+				},
+			);
+			console.log(data.message);
+			setError("");
+			setSuccess(true);
+			setSuccessMsg(data.message);
+		} catch (error) {
+			setError(error.response.data.message);
+			console.log(error.response.data.message);
+		}
+	};
+
+	const login = async () => {
+		try {
+			if (
+				!formData.email ||
+				formData.email.trim().length === 0 ||
+				!formData.password ||
+				formData.password.trim().length === 0
+			) {
+				return;
+			}
+			const { data } = await axios.post(
+				"http://localhost:3000/login",
+				formData,
+				{
+					withCredentials: true,
+				},
+			);
+			console.log(data.message);
+			setError("");
+			setSuccess(true);
+			setSuccessMsg(data.message);
+			console.log(data.user)
+		} catch (error) {
+			setError(error.response.data.message);
+			console.log(error.response.data.message);
+		}
+	};
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -24,25 +73,17 @@ export default function App() {
 		setSuccess(false);
 
 		// Basic Client-side Validation
-		if (formData.password !== formData.confirmPassword) {
+		if (!islogin && formData.password !== formData.confirmPassword) {
 			setError("Passwords do not match.");
 			return;
 		}
 
-		try {
-			const { data } = await axios.post(
-				"http://localhost:3000/signup",
-				formData,
-				{
-					withCredentials: true,
-				},
-			);
-			console.log(data.message);
-			setError("");
-			setSuccess(true);
-		} catch (error) {
-			setError(error.response.data.message);
-			console.log(error.response.data.message);
+		if (islogin) {
+			// call login
+			await login();
+		} else {
+			//call signup
+			await signup();
 		}
 	};
 
@@ -51,10 +92,11 @@ export default function App() {
 			<div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
 				<div>
 					<h2 className="mt-6 text-center text-3xl font-light tracking-tight text-gray-900">
-						Create Account
+						{islogin ? "Login Account" : "Create Account"}
 					</h2>
 					<p className="mt-2 text-center text-sm text-gray-500">
-						Please enter your details to sign up.
+						Please enter your details to{" "}
+						{islogin ? "Login" : "sign up"}.
 					</p>
 				</div>
 
@@ -66,13 +108,12 @@ export default function App() {
 					)}
 					{success && (
 						<div className="rounded-md bg-green-50 p-3 text-sm text-green-600 border border-green-100">
-							Registration initial check successful! (Ready for
-							API)
+							{successMsg}
 						</div>
 					)}
 
 					<div className="space-y-4">
-						<div>
+						<div className={`${islogin && "hidden"}`}>
 							<label
 								htmlFor="username"
 								className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-1"
@@ -83,7 +124,7 @@ export default function App() {
 								id="username"
 								name="username"
 								type="text"
-								required
+								required={!islogin}
 								value={formData.username}
 								onChange={handleChange}
 								className="w-full border-b border-gray-200 py-2 text-gray-900 placeholder-gray-300 focus:border-black focus:outline-none transition-colors text-sm"
@@ -91,7 +132,7 @@ export default function App() {
 							/>
 						</div>
 
-						<div>
+						<div className={`${islogin && "hidden"}`}>
 							<label
 								htmlFor="mobile"
 								className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-1"
@@ -102,7 +143,7 @@ export default function App() {
 								id="mobile"
 								name="mobile"
 								type="tel"
-								required
+								required={!islogin}
 								value={formData.mobile}
 								onChange={handleChange}
 								className="w-full border-b border-gray-200 py-2 text-gray-900 placeholder-gray-300 focus:border-black focus:outline-none transition-colors text-sm"
@@ -148,7 +189,7 @@ export default function App() {
 							/>
 						</div>
 
-						<div>
+						<div className={`${islogin && "hidden"}`}>
 							<label
 								htmlFor="confirmPassword"
 								className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-1"
@@ -159,7 +200,7 @@ export default function App() {
 								id="confirmPassword"
 								name="confirmPassword"
 								type="password"
-								required
+								required={!islogin}
 								value={formData.confirmPassword}
 								onChange={handleChange}
 								className="w-full border-b border-gray-200 py-2 text-gray-900 placeholder-gray-300 focus:border-black focus:outline-none transition-colors text-sm"
@@ -173,10 +214,21 @@ export default function App() {
 							type="submit"
 							className="w-full bg-black py-3 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all rounded-md mt-4"
 						>
-							Sign Up
+							{islogin ? "Login" : "Signup"}
 						</button>
 					</div>
 				</form>
+				<button
+					onClick={() => {
+						setError("");
+						setSuccessMsg("");
+						setSuccess(false);
+						setIsLogin(!islogin);
+					}}
+					className="w-full underline text-blue-300 cursor-pointer active:scale-95 active:font-semibold"
+				>
+					{islogin ? "signup" : "login"}
+				</button>
 			</div>
 		</div>
 	);

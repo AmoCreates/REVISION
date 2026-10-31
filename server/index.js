@@ -47,9 +47,9 @@ app.post("/signup", async (req, res) => {
 			});
 		}
 
-		const exists = users.some((user) => user.email === mobile);
+		const exists = users.some((user) => user.email === email);
 
-		if (exists) {
+		if (!exists) {
 			users.push({ name: username, mobile, email, password });
 			return res.status(201).json({ message: "Signup Successfull!!" });
 		}
@@ -60,6 +60,32 @@ app.post("/signup", async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({
 			message: "someting went wrong, signup failed!",
+		});
+	}
+});
+
+app.post("/login", async (req, res) => {
+	try {
+		const { email, password } = await req.body;
+		if (!email || !password) {
+			return res
+				.status(400)
+				.json({ message: "All credentials requires" });
+		}
+		const exists = users.some((user) => user.email === email);
+		const isValid = users.some((user) => user.password === password);
+
+		if (!exists || !isValid) {
+			return res.status(400).json({
+				message: "Either email or password is invalid",
+			});
+		}
+
+		const user = users.find((user) => user.email === email);
+		return res.status(201).json({user, message: "login successfull!"});
+	} catch (error) {
+		return res.status(500).json({
+			message: "someting went wrong, login failed!",
 		});
 	}
 });
