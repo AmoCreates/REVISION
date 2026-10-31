@@ -50,7 +50,13 @@ app.post("/signup", async (req, res) => {
 		const exists = users.some((user) => user.email === email);
 
 		if (!exists) {
-			users.push({ name: username, mobile, email, password });
+			users.push({
+				name: username,
+				mobile,
+				email,
+				password,
+				loggedin: false,
+			});
 			return res.status(201).json({ message: "Signup Successfull!!" });
 		}
 
@@ -72,20 +78,56 @@ app.post("/login", async (req, res) => {
 				.status(400)
 				.json({ message: "All credentials requires" });
 		}
-		const exists = users.some((user) => user.email === email);
-		const isValid = users.some((user) => user.password === password);
-
-		if (!exists || !isValid) {
+		const user = users.find(
+			(user) => user.email === email && user.password === password,
+		);
+		if (!user) {
 			return res.status(400).json({
 				message: "Either email or password is invalid",
 			});
 		}
 
-		const user = users.find((user) => user.email === email);
-		return res.status(201).json({user, message: "login successfull!"});
+		user.loggedin = true;
+		return res.status(201).json({ message: "login successfull!" });
 	} catch (error) {
 		return res.status(500).json({
 			message: "someting went wrong, login failed!",
+		});
+	}
+});
+
+const isLoggedin = async (req, res, next) => {
+	try {
+		const { email, password } = req.body || {};
+		if (!email || !password) {
+			return res
+				.status(401)
+				.json({ message: "user not found! you need to login first" });
+		}
+
+		const user = users.find(
+			(user) => user.email === email && user.password === password,
+		);
+		if (!user) {
+			return res.status(401).json({ message: "user not found!" });
+		}
+
+		req.user = user;
+		next();
+	} catch (error) {
+		return res
+			.status(500)
+			.json({ message: "sonething went wrong, try again" });
+	}
+};
+
+app.post("/getData", isLoggedin, async (req, res) => {
+	try {
+		const { name, mobile, email } = req.user;
+		return res.status(200).json({ name, mobile, email });
+	} catch (error) {
+		return res.status(500).json({
+			message: "someting went wrong, failed to fetch user data!",
 		});
 	}
 });
