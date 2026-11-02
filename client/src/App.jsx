@@ -14,6 +14,7 @@ export default function App() {
 	const [successMsg, setSuccessMsg] = useState("");
 	const [success, setSuccess] = useState(false);
 	const [state, setState] = useState("signup");
+	const [data, setData] = useState(null);
 
 	const signup = async () => {
 		try {
@@ -81,6 +82,7 @@ export default function App() {
 				},
 			);
 			console.log(data);
+			setData(data);
 			setError("");
 			setSuccess(true);
 			setSuccessMsg("data received successfully!!!");
@@ -102,7 +104,7 @@ export default function App() {
 
 		// Basic Client-side Validation
 		if (
-			state !== "login" &&
+			state === "signup" &&
 			formData.password !== formData.confirmPassword
 		) {
 			setError("Passwords do not match.");
@@ -144,6 +146,14 @@ export default function App() {
 					{success && (
 						<div className="rounded-md bg-green-50 p-3 text-sm text-green-600 border border-green-100">
 							{successMsg}
+						</div>
+					)}
+
+					{data && (
+						<div className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-600 border border-zinc-100">
+							<p><b className="text-black">Name: </b>{data.name}</p>
+							<p><b className="text-black">Email: </b>{data.email}</p>
+							<p><b className="text-black">Mobile: </b> {data.mobile}</p>
 						</div>
 					)}
 
