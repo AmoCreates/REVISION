@@ -39,11 +39,11 @@ app.post("/signup", async (req, res) => {
 		if (!username || !mobile || !email || !password || !confirmPassword) {
 			return res
 				.status(400)
-				.json({ message: "All credentials requires" });
+				.json({ message: "All credentials are required." });
 		}
 		if (password !== confirmPassword) {
 			return res.status(400).json({
-				message: "password and confirm password do not matched",
+				message: "Password and confirm password do not match.",
 			});
 		}
 
@@ -57,15 +57,15 @@ app.post("/signup", async (req, res) => {
 				password,
 				loggedin: false,
 			});
-			return res.status(201).json({ message: "Signup Successfull!!" });
+			return res.status(201).json({ message: "Signup successful!" });
 		}
 
 		return res.status(400).json({
-			message: "email already exists.",
+			message: "Email already exists.",
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: "someting went wrong, signup failed!",
+			message: "Something went wrong, signup failed!",
 		});
 	}
 });
@@ -76,22 +76,22 @@ app.post("/login", async (req, res) => {
 		if (!email || !password) {
 			return res
 				.status(400)
-				.json({ message: "All credentials requires" });
+				.json({ message: "All credentials are required." });
 		}
 		const user = users.find(
 			(user) => user.email === email && user.password === password,
 		);
 		if (!user) {
 			return res.status(400).json({
-				message: "Either email or password is invalid",
+				message: "Either email or password is invalid.",
 			});
 		}
 
 		user.loggedin = true;
-		return res.status(201).json({ message: "login successfull!" });
+		return res.status(200).json({ message: "Login successful!" });
 	} catch (error) {
 		return res.status(500).json({
-			message: "someting went wrong, login failed!",
+			message: "Something went wrong, login failed!",
 		});
 	}
 });
@@ -102,14 +102,14 @@ const isLoggedin = async (req, res, next) => {
 		if (!email || !password) {
 			return res
 				.status(401)
-				.json({ message: "user not found! you need to login first" });
+				.json({ message: "User not found. You need to log in first." });
 		}
 
 		const user = users.find(
 			(user) => user.email === email && user.password === password,
 		);
 		if (!user) {
-			return res.status(401).json({ message: "user not found!" });
+			return res.status(401).json({ message: "User not found." });
 		}
 
 		req.user = user;
@@ -117,7 +117,7 @@ const isLoggedin = async (req, res, next) => {
 	} catch (error) {
 		return res
 			.status(500)
-			.json({ message: "sonething went wrong, try again" });
+			.json({ message: "Something went wrong, please try again." });
 	}
 };
 
@@ -127,7 +127,7 @@ app.post("/getData", isLoggedin, async (req, res) => {
 		return res.status(200).json({ name, mobile, email });
 	} catch (error) {
 		return res.status(500).json({
-			message: "someting went wrong, failed to fetch user data!",
+			message: "Something went wrong, failed to fetch user data!",
 		});
 	}
 });
