@@ -20,6 +20,20 @@ app.use(
 const users = [];
 
 app.get("/", (req, res) => {
+	// All Headers
+	console.log(req.headers)
+	// Getting a Specific Header
+	console.log(req.get("user-agent"))
+	
+	// Set Headers | Custome Headers
+	// Convention to use (x-) for custome headers
+	// 2 Ways to Set Headers
+	res.set("x-username", "Amy")
+	res.header("x-email", "AmoCreates@outlook.com")
+
+	// Remove Header
+	res.removeHeader("x-email")
+	
 	res.send("server is ready to serve");
 });
 
