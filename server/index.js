@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import "dotenv/config";
+import dbConnect from "./config/connection.db.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -146,6 +147,7 @@ app.post("/getData", isLoggedin, async (req, res) => {
 	}
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
+	await dbConnect();
 	console.log(`server is running at port: http://localhost:${port}`);
 });
