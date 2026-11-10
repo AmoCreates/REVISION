@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import "dotenv/config";
 import dbConnect from "./config/connection.db.js";
+import user from "./models/user.model.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -18,23 +19,21 @@ app.use(
 	}),
 );
 
-const users = [];
-
 app.get("/", (req, res) => {
 	// All Headers
-	console.log(req.headers)
+	console.log(req.headers);
 	// Getting a Specific Header
-	console.log(req.get("user-agent"))
-	
+	console.log(req.get("user-agent"));
+
 	// Set Headers | Custome Headers
 	// Convention to use (x-) for custome headers
 	// 2 Ways to Set Headers
-	res.set("x-username", "Amy")
-	res.header("x-email", "AmoCreates@outlook.com")
+	res.set("x-username", "Amy");
+	res.header("x-email", "AmoCreates@outlook.com");
 
 	// Remove Header
-	res.removeHeader("x-email")
-	
+	res.removeHeader("x-email");
+
 	res.send("server is ready to serve");
 });
 
@@ -62,22 +61,20 @@ app.post("/signup", async (req, res) => {
 			});
 		}
 
-		const exists = users.some((user) => user.email === email);
+		const exists = await user.findOne({email});
 
-		if (!exists) {
-			users.push({
-				name: username,
-				mobile,
-				email,
-				password,
-				loggedin: false,
+		if (exists)
+			return res.status(400).json({
+				message: "Email already exists.",
 			});
-			return res.status(201).json({ message: "Signup successful!" });
-		}
 
-		return res.status(400).json({
-			message: "Email already exists.",
+		await user.create({
+			name: username,
+			email,
+			mobile,
+			password,
 		});
+		return res.status(201).json({ message: "Signup successful!" });
 	} catch (error) {
 		return res.status(500).json({
 			message: "Something went wrong, signup failed!",
@@ -93,16 +90,21 @@ app.post("/login", async (req, res) => {
 				.status(400)
 				.json({ message: "All credentials are required." });
 		}
-		const user = users.find(
-			(user) => user.email === email && user.password === password,
-		);
-		if (!user) {
+		const person = await user.findOne({email});
+		if (!person) {
 			return res.status(400).json({
 				message: "Either email or password is invalid.",
 			});
 		}
 
-		user.loggedin = true;
+		if (person.password !== password) {
+			return res.status(400).json({
+				message: "Either email or password is invalid.",
+			});
+		}
+
+		person.loggedin = true;
+		await person.save();
 		return res.status(200).json({ message: "Login successful!" });
 	} catch (error) {
 		return res.status(500).json({
@@ -120,14 +122,18 @@ const isLoggedin = async (req, res, next) => {
 				.json({ message: "User not found. You need to log in first." });
 		}
 
-		const user = users.find(
-			(user) => user.email === email && user.password === password,
-		);
-		if (!user) {
+		const person = await user.findOne({email});
+		if (!person) {
 			return res.status(401).json({ message: "User not found." });
 		}
 
-		req.user = user;
+		if (person.password !== password) {
+			return res.status(400).json({
+				message: "Either email or password is invalid.",
+			});
+		}
+
+		req.user = person;
 		next();
 	} catch (error) {
 		return res
