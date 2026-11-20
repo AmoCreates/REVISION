@@ -37,10 +37,6 @@ app.get("/", (req, res) => {
 	res.send("server is ready to serve");
 });
 
-app.get("/hello", (req, res) => {
-	res.status(200).json({ message: "Hello from backend" });
-});
-
 app.get("/search", (req, res) => {
 	const query = req.query;
 	res.json(query);
