@@ -39,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.get("/search", (req, res) => {
 	const query = req.query;
+	console.log(query);
 	res.json(query);
 });
 
